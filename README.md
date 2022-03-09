@@ -1,6 +1,8 @@
 # invoice-pdf
 For software contractors, automate the creation of monthly invoices to client.
 
+![sample invoice](https://github.com/pvsune/invoice-pdf/blob/master/sample.png?raw=true)
+
 ## Quickstart
 1. Write the `.env` file used to extract values from:
     ```
