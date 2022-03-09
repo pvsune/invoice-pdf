@@ -2,23 +2,45 @@ package main
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"text/template"
+
+	pdf "github.com/SebastiaanKlippert/go-wkhtmltopdf"
 )
 
 var (
-	templateFile = "invoice.html"
+	inputTemplate = "invoice.html"
+	outputPDF     = "invoice.pdf"
 )
 
 func main() {
-	w, err := parseTemplate(templateFile)
+	w, err := parseTemplate(inputTemplate)
 	if err != nil {
 		log.Fatalf("cannot parse template: %s", err)
 	}
 
-	log.Println(w.String())
+	if err := writeToPDF(w, outputPDF); err != nil {
+		log.Fatalf("cannot write to PDF: %s", err)
+	}
+	log.Println("Successfully created PDF: " + outputPDF)
+}
+
+func writeToPDF(w io.Reader, name string) error {
+	pdfg, err := pdf.NewPDFGenerator()
+	if err != nil {
+		return err
+	}
+	pdfg.AddPage(pdf.NewPageReader(w))
+	if err := pdfg.Create(); err != nil {
+		return err
+	}
+	if err := pdfg.WriteFile("./" + name); err != nil {
+		log.Fatalf("cannot write PDF file: %s", err)
+	}
+	return nil
 }
 
 func parseTemplate(name string) (*bytes.Buffer, error) {
