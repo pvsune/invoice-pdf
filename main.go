@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	inputTemplate = "invoice.html"
-	outputPDF     = "invoice.pdf"
+	inputTemplate = "/root/invoice.html"
+	outputPDF     = "/root/invoice.pdf"
 )
 
 func main() {
