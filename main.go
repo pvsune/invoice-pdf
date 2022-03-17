@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,6 +18,10 @@ var (
 )
 
 func main() {
+	startDate := &DateValue{}
+	flag.Var(startDate, "start", "Your start date. Used to compute inovice number (e.g. Sep 1991)")
+	flag.Parse()
+
 	w, err := parseTemplate(inputTemplate)
 	if err != nil {
 		log.Fatalf("cannot parse template: %s", err)
