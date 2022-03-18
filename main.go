@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"text/template"
+	"time"
 
 	pdf "github.com/SebastiaanKlippert/go-wkhtmltopdf"
 )
@@ -16,12 +17,19 @@ var (
 	inputTemplate = "/root/invoice.html"
 	outputPDF     = "/root/invoice.pdf"
 )
+var (
+	startDate = &DateValue{}
+)
 
-func main() {
-	startDate := &DateValue{}
+func init() {
 	flag.Var(startDate, "start", "Your start date. Used to compute inovice number (e.g. Sep 1991)")
 	flag.Parse()
+	if startDate.Date.After(time.Now()) {
+		log.Fatalf("invalid start date")
+	}
+}
 
+func main() {
 	w, err := parseTemplate(inputTemplate)
 	if err != nil {
 		log.Fatalf("cannot parse template: %s", err)
@@ -88,4 +96,12 @@ func parseTemplate(name string) (*bytes.Buffer, error) {
 		return nil, err
 	}
 	return w, nil
+}
+
+func invoiceNum() int {
+	d := time.Since(*startDate.Date)
+	if num := int(d.Hours() / 24 / 30); num > 0 {
+		return num
+	}
+	return 1
 }
