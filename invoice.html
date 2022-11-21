@@ -66,7 +66,7 @@
         <p>{{ .AddressLine1 }}</p>
         <p>{{ .AddressLine2 }}</p>
         <p>Email: {{ .Email }}</p>
-        <p>IBAN Number: {{ .IBANNumber }}</p>
+        <p>Account Number: {{ .IBANNumber }}</p>
         <p>SWIFT Code: {{ .SwiftCode }}</p>
     </div>
     <div class="float-right">
@@ -74,11 +74,11 @@
         <table class="right" id="invoice">
             <tr>
                 <td class="bold">INVOICE NO.:</td>
-                <td>xxx</td>
+                <td>{{ .InvoiceNumber }}</td>
             </tr>
             <tr>
                 <td class="bold">DATE:</td>
-                <td>xx/xx/xx</td>
+                <td>{{ .Now }}</td>
             </tr>
         </table>
     </div>

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -73,23 +74,25 @@ func parseTemplate(name string) (*bytes.Buffer, error) {
 			Name, AddressLine1, AddressLine2, Email                             string
 			IBANNumber, SwiftCode                                               string
 			CompanyName, CompanyAddressLine1, CompanyAddressLine2, CompanyEmail string
-			ServiceDescription                                                  string
+			TotalDue                                                            string
+			ServiceDescription, InvoiceNumber, Now                              string
 			NetDays                                                             int
-			TotalDue                                                            int
 		}{
 			Name:                os.Getenv("NAME"),
 			AddressLine1:        os.Getenv("ADDRESS_LINE_1"),
 			AddressLine2:        os.Getenv("ADDRESS_LINE_2"),
 			Email:               os.Getenv("EMAIL"),
-			IBANNumber:          "xxx",
-			SwiftCode:           "xxx",
+			IBANNumber:          os.Getenv("ACCOUNT_NUMBER"),
+			SwiftCode:           os.Getenv("SWIFT_CODE"),
 			CompanyName:         os.Getenv("COMPANY_NAME"),
 			CompanyAddressLine1: os.Getenv("COMPANY_ADDRESS_LINE_1"),
 			CompanyAddressLine2: os.Getenv("COMPANY_ADDRESS_LINE_2"),
 			CompanyEmail:        os.Getenv("COMPANY_EMAIL"),
-			ServiceDescription:  "Software Engineering Services for the period of xx/xx/xx - xx/xx/xx",
-			NetDays:             30,
-			TotalDue:            30,
+			TotalDue:            os.Getenv("TOTAL_DUE"),
+			ServiceDescription:  "Software Engineering Services for the period of " + invoicePeriod(),
+			InvoiceNumber:       fmt.Sprintf("%03d", invoiceNum()),
+			Now:                 time.Now().Format("01/02/06"),
+			NetDays:             netDays(),
 		}
 	)
 	if err := t.Execute(w, data); err != nil {
@@ -100,8 +103,32 @@ func parseTemplate(name string) (*bytes.Buffer, error) {
 
 func invoiceNum() int {
 	d := time.Since(*startDate.Date)
-	if num := int(d.Hours() / 24 / 30); num > 0 {
-		return num
+	return int(d.Hours()/24/30) + 1
+}
+
+func invoicePeriod() string {
+	now := time.Now()
+	return fmt.Sprintf(
+		"%s - %s",
+		now.AddDate(0, 0, -now.Day()+1).Format("01/02/06"),
+		now.AddDate(0, 1, -now.Day()).Format("01/02/06"),
+	)
+}
+
+func netDays() int {
+	var (
+		now   = time.Now()
+		start = now.AddDate(0, 0, -now.Day()+1)
+		end   = now.AddDate(0, 1, -now.Day())
+
+		date = start
+		net  int
+	)
+	for !date.After(end) {
+		if date.Weekday() != time.Saturday && date.Weekday() != time.Sunday {
+			net += 1
+		}
+		date = date.AddDate(0, 0, 1)
 	}
-	return 1
+	return net
 }
